@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solo Tracking Habit Tracker</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://example.com/solo-tracking-bg.jpg'); /* Remplace par une image d'arrière-plan sombre */
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .tracker-container {
+            margin: 100px auto;
+            padding: 30px;
+            background: linear-gradient(135deg, #1f2833, #0b0c10);
+            border-radius: 15px;
+            width: 350px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+            border: 2px solid #45a29e;
+            position: relative;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .tracker-container:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 50px #66fcf1;
+        }
+
+        .tracker-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(102, 252, 241, 0.2);
+            border-radius: 15px;
+            z-index: -1;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .tracker-container:hover::before {
+            opacity: 0.4;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 5px;
+            color: #66fcf1;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(102, 252, 241, 0.8);
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #45a29e;
+            text-shadow: 0 0 10px rgba(69, 162, 158, 0.8);
+        }
+
+        .habits-list {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .habit {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #1f2833;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.5);
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        .habit:hover {
+            background-color: #66fcf1;
+        }
+
+        label {
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.5);
+            accent-color: #66fcf1;
+        }
+
+        input[type="checkbox"]:checked + span {
+            color: #45a29e;
+            text-decoration: line-through;
+        }
+
+        button {
+            background-color: #45a29e;
+            border: none;
+            padding: 12px 25px;
+            color: #0b0c10;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.8);
+        }
+
+        button:hover {
+            background-color: #66fcf1;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding-top: 50px;
+        }
+
+        .modal-content {
+            background-color: #1f2833;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #45a29e;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px #66fcf1;
+            color: #ffffff;
+        }
+
+        .settings-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .settings-content .form-group {
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .settings-content label {
+            margin-bottom: 5px;
+            font-size: 16px;
+            color: #66fcf1;
+        }
+
+        .settings-content input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #45a29e;
+            border-radius: 8px;
+            background-color: #1f2833;
+            color: #ffffff;
+        }
+
+        .settings-content button {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .settings-content button:hover {
+            background-color: #45a29e;
+        }
+
+        /* Close button styles */
+        .close {
+            color: #aaaaaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #ffffff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="tracker-container">
+        <div class="header">
+            <h1>Solo Tracking</h1>
+            <button class="settings-button" onclick="openSettings()">⚙️</button>
+        </div>
+        <h2>Habit Tracker</h2>
+        <div class="habits-list">
+            <div class="habit">
+                <label>
+                    <input type="checkbox" id="habit1" onclick="toggleHabit('habit1')">
+                    <span id="habit1Text">Daily Training</span>
+                </label>
+            </div>
+            <div class="habit">
+                <label>
+                    <input type="checkbox" id="habit2" onclick="toggleHabit('habit2')">
+                    <span id="habit2Text">Complete Quests</span>
+                </label>
+            </div>
+            <div class="habit">
+                <label>
+                    <input type="checkbox" id="habit3" onclick="toggleHabit('habit3')">
+                    <span id="habit3Text">Gather Resources</span>
+                </label>
+            </div>
+        </div>
+        <button onclick="showStats()">View Progress</button>
+    </div>
+
+    <!-- Modal for Statistics -->
+    <div id="stats-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStats()">&times;</span>
+            <h2>Your Progress</h2>
+            <canvas id="progressChart"></canvas>
+            <p>Best Streak: <span id="bestStreak">0</span> days</p>
+            <p>Current Streak: <span id="currentStreak">0</span> days</p>
+        </div>
+    </div>
+
+    <!-- Modal for Settings -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content settings-content">
+            <span class="close" onclick="closeSettings()">&times;</span>
+            <h2>Modify Habits</h2>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label for="habit1Input">Habit 1:</label>
+                    <input type="text" id="habit1Input" value="Daily Training">
+                </div>
+                <div class="form-group">
+                    <label for="habit2Input">Habit 2:</label>
+                    <input type="text" id="habit2Input" value="Complete Quests">
+                </div>
+                <div class="form-group">
+                    <label for="habit3Input">Habit 3:</label>
+                    <input type="text" id="habit3Input" value="Gather Resources">
+                </div>
+                <button type="button" onclick="saveSettings()">Save</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let bestStreak = 0;
+        let currentStreak = 0;
+        let lastCheckedDate = null;
+
+        function toggleHabit(habitId) {
+            const habitElement = document.getElementById(habitId);
+            if (habitElement.checked) {
+                updateStreak();
+            }
+        }
+
+        function updateStreak() {
+            const today = new Date().toLocaleDateString();
+            if (lastCheckedDate === today) return;
+
+            if (lastCheckedDate === null || (new Date(today) - new Date(lastCheckedDate)) === 1) {
+                currentStreak++;
+            } else {
+                currentStreak = 1;
+            }
+
+            bestStreak = Math.max(bestStreak, currentStreak);
+            lastCheckedDate = today;
+
+            document.getElementById('bestStreak').innerText = bestStreak;
+            document.getElementById('currentStreak').innerText = currentStreak;
+        }
+
+        function showStats() {
+            const modal = document.getElementById('stats-modal');
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            modal.style.display = "block";
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                    datasets: [{
+                        label: 'Habit Progress',
+                        data: [0, 0, 0, 0, 0], // Update with actual data if available
+                        borderColor: '#66fcf1',
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#ffffff' }
+                        },
+                        x: {
+                            ticks: { color: '#ffffff' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#ffffff' } }
+                    }
+                }
+            });
+        }
+
+        function closeStats() {
+            document.getElementById('stats-modal').style.display = "none";
+        }
+
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = "block";
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = "none";
+        }
+
+        function saveSettings() {
+            document.getElementById('habit1Text').textContent = document.getElementById('habit1Input').value;
+            document.getElementById('habit2Text').textContent = document.getElementById('habit2Input').value;
+            document.getElementById('habit3Text').textContent = document.getElementById('habit3Input').value;
+            closeSettings();
+        }
+
+        function resetAtMidnight() {
+            const now = new Date();
+            const millisTillMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0) - now;
+            setTimeout(() => {
+                updateStreak(); // This ensures the streak is updated
+                resetAtMidnight(); // Set up the next reset
+            }, millisTillMidnight);
+        }
+
+        // Initialize midnight reset
+        resetAtMidnight();
+    </script>
+</body>
+</html>
